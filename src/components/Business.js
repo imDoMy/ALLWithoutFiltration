@@ -21,6 +21,7 @@ import { BusinessFetch, AddBusinessToFav, FavoriteBusinessesFetch, RemoveBusines
 
 class Business extends Component {
 componentWillMount() {
+  console.log('business');
 
   const { uid } = this.props.business;
   this.props.FavoriteBusinessesFetch();
@@ -174,7 +175,6 @@ Alert.alert(
     const { buttonStyle, textStyle, BussinesImageStyle, ViewCardStyle, RatingStyle,
        DescriptionViewStyle, DescriptionTextStyle, ReviewViewStyle } = styles;
     const { category, categoryE, restaurant_name, restaurant_nameE, rateing_image, image, description, descriptionE, Contact_information, uid } = this.props;
-console.log(descriptionE);
     if (this.props.language === 'Arabic'){
     return (
       <ScrollView>

@@ -24,12 +24,54 @@ export const WriteReview = ({ restaurant_name, restaurant_nameE, UserName, UserC
   };
 };
 
+export const WriteReviewSec2 = ({ restaurant_name, restaurant_nameE, UserName, UserComment, rate, rateing_image, uid }) => {
+
+ const { currentUser } = firebase.auth();
+
+  return (dispatch) => {
+    firebase.database().ref(`/Businesses/${uid}/Reviews2`)
+      .push({ UserName, UserComment, rate, rateing_image })
+      .then(firebase.database().ref(`/Users/${currentUser.uid}/Reviews`)
+        .push({ UserName, UserComment, rate, rateing_image, restaurant_name, restaurant_nameE })
+        .then(() => {
+        dispatch({ type: 'REVIEW_CREATE' });
+      })
+        );
+  };
+};
+
+export const TransReviewSec2 = ({ UserName, UserComment, rate, rateing_image, uid, ruid }) => {
+
+ const { currentUser } = firebase.auth();
+console.log(uid);
+  return (dispatch) => {
+    firebase.database().ref(`/Businesses/${uid}/Reviews`)
+      .push({ UserName, UserComment, rate, rateing_image })
+      .then(firebase.database().ref(`/Businesses/${uid}/Reviews2/${ruid}`)
+        .remove()
+        .then(() => {
+        dispatch({ type: 'REVIEW_CREATE' });
+      })
+        );
+  };
+};
+
 
 export const ReviewsFetch = ({ uid }) => {
   return (dispatch) => {
     firebase.database().ref(`/Businesses/${uid}/Reviews`)
       .on('value', snapshot => {
         dispatch({ type: 'REVIEWS_FETCH_SUCCESS', payload: snapshot.val() });
+      });
+  };
+};
+
+export const ReviewsFetchSec2 = ({ uid }) => {
+  console.log(uid);
+  return (dispatch) => {
+    firebase.database().ref(`/Businesses/${uid}/Reviews2`)
+      .on('value', snapshot => {
+        dispatch({ type: 'REVIEWS2_FETCH_SUCCESS', payload: snapshot.val() });
       });
   };
 };

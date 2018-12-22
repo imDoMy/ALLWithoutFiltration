@@ -53,6 +53,24 @@ export const BusinessUpdate = ({ uid, total_rates, number_of_rates, rateing_imag
   };
 };
 
+
+export const BusinessUpdateSec2 = ({ uid, total_rates1, number_of_rates1 }) => {
+  return () => {
+    firebase.database().ref(`/Businesses/${uid}`)
+      .update({ total_rates1, number_of_rates1 })
+      .then(() => {
+        Actions.pop();
+      });
+  };
+};
+
+export const BusinessUpdate2 = ({ uid }) => {
+  return () => {
+    firebase.database().ref(`/Businesses/${uid}`)
+      .update({ total_rates1: 0, number_of_rates1: 0 })
+  };
+};
+
 export const AddBusinessToFav = ({ uid, category, restaurant_name, restaurant_nameE, rateing_image, image, description, descriptionE, Contact_information, categoryE, longitude, latitude }) => {
 
  const { currentUser } = firebase.auth();

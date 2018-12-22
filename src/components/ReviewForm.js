@@ -2,11 +2,23 @@ import React, { Component } from 'react';
 import { View, Text, Picker, TouchableOpacity, Alert } from 'react-native';
 import { connect } from 'react-redux';
 import { Actions } from 'react-native-router-flux';
-import { WriteReview, reviewUpdate, BusinessFetch, BusinessUpdate, UserFetchInfo } from '../actions';
+import _ from 'lodash';
+import { BusinessUpdateSec2, WriteReview, reviewUpdate, BusinessFetch, BusinessUpdate, UserFetchInfo, WriteReviewSec2, ReviewsFetchSec2, TransReviewSec2, BusinessUpdate2 } from '../actions';
 import { CardSection, Input, TextInputt } from './common';
 
 
 class ReviewForm extends Component {
+  componentWillMount() {
+    // here i took the uid of the business so i can fetch the data
+    this.props.UserFetchInfo();
+    const { uid } = this.props.business;
+    this.props.ReviewsFetchSec2({ uid });
+
+  //here we fetch the business data every time we render this component
+  // so we can get the newest total_rates and number_of_rates
+    this.props.BusinessFetch({ uid });
+  }
+
 language(){
   if (this.props.language === 'Arabic') {
     return (
@@ -91,20 +103,12 @@ return (
 </View>
 );
 }
-componentWillMount() {
-  // here i took the uid of the business so i can fetch the data
-  this.props.UserFetchInfo();
-  const { uid } = this.props.business;
 
-//here we fetch the business data every time we render this component
-// so we can get the newest total_rates and number_of_rates
-  this.props.BusinessFetch({ uid });
-}
 
 
   onButtonPress() {
-    if (this.props.em || this.props.emaillog) {
-  const { UserComment, rate, total_rates, number_of_rates, restaurant_name, restaurant_nameE } = this.props;
+    if (this.props.em !== '' || this.props.em !== undefined || this.props.emaillog !== '' || this.props.emaillog !== undefined ) {
+  const { UserComment, rate, total_rates, number_of_rates, restaurant_name, restaurant_nameE, total_rates1, number_of_rates1 } = this.props;
   const { fullname } = this.props.Info;
   const { uid } = this.props.business;
 // here i fecht the data again just to make sure the data is here
@@ -145,12 +149,35 @@ this.props.BusinessFetch({ uid });
   const int_number_of_rates = parseInt(number_of_rates, 10);
   const new_int_number_of_rates = int_number_of_rates + 1;
   const new_int_total_rates = int_total_rates + new_rate;
+  const  oldAvg = int_total_rates/int_number_of_rates;
   const avg = new_int_total_rates/new_int_number_of_rates;
   const new_string_number_of_rates = new_int_number_of_rates.toString();
   const new_string_total_rates = new_int_total_rates.toString();
   var rateing_image1;
+  if(int_number_of_rates === 0){
+    if (avg > 0 && avg <= 1) {
+      rateing_image1 = 'https://i.postimg.cc/0KG3ynvz/1.png';
+    }
+    else if (avg > 1 && avg <= 2) {
+      rateing_image1 = 'https://i.postimg.cc/yJwrhtYJ/2.png';
+    }
+    else if (avg > 2 && avg <= 3) {
+      rateing_image1 = 'https://i.postimg.cc/BtGJ4wcQ/3.png';
+    }
+    else if (avg > 3 && avg <= 4) {
+      rateing_image1 = 'https://i.postimg.cc/kBTCNMrB/4.png';
+    }
+    else if (avg > 4 && avg <= 5) {
+      rateing_image1 = 'https://i.postimg.cc/p5BGHdQ8/5.png';
+    }
+    this.props.BusinessUpdate({ uid, total_rates: new_string_total_rates, number_of_rates: new_string_number_of_rates, rateing_image: rateing_image1 })
+    // here im saving the review in the business and the user's Reviews
+      this.props.WriteReview({ restaurant_name, restaurant_nameE, UserComment, uid, UserName: fullname, rateing_image, rate: rate || '5' });
+return;
+}
 
-  //here im cheking the avarage so i can give the business new rate
+  const diffSec1 = Math.abs(oldAvg - avg);
+if (diffSec1 < 1) {
   if (avg > 0 && avg <= 1) {
     rateing_image1 = 'https://i.postimg.cc/0KG3ynvz/1.png';
   }
@@ -166,11 +193,86 @@ this.props.BusinessFetch({ uid });
   else if (avg > 4 && avg <= 5) {
     rateing_image1 = 'https://i.postimg.cc/p5BGHdQ8/5.png';
   }
-// here im updating the business rate
-this.props.BusinessUpdate({ uid, total_rates: new_string_total_rates, number_of_rates: new_string_number_of_rates, rateing_image: rateing_image1 })
-// here im saving the review in the business and the user's Reviews
-  this.props.WriteReview({ restaurant_name, restaurant_nameE, UserComment, uid, UserName: fullname, rateing_image, rate: rate || '5' });
+  this.props.BusinessUpdate({ uid, total_rates: new_string_total_rates, number_of_rates: new_string_number_of_rates, rateing_image: rateing_image1 })
+  // here im saving the review in the business and the user's Reviews
+    this.props.WriteReview({ restaurant_name, restaurant_nameE, UserComment, uid, UserName: fullname, rateing_image, rate: rate || '5' });
+
+} else {
+  const sec2_Total_Rate = total_rates1 ;
+  const sec2_number_of_rates =   number_of_rates1 ;
+  const sec2OldAvg = sec2_Total_Rate/sec2_number_of_rates;
+  const new_sec2_Total_Rate = total_rates1 + new_rate;
+  const new_sec2_number_of_rates = number_of_rates1 + 1 ;
+  const sec2Avg = new_sec2_Total_Rate/new_sec2_number_of_rates;
+  const diffSec2 = Math.abs(sec2OldAvg - sec2Avg);
+  if(sec2_number_of_rates === 0) {
+
+  this.props.WriteReviewSec2({ restaurant_name, restaurant_nameE, UserComment, uid, UserName: fullname, rateing_image, rate: rate || '5' });
+
+  this.props.BusinessUpdateSec2({ uid, total_rates1: new_sec2_Total_Rate, number_of_rates1: new_sec2_number_of_rates })
+  return;
+} else {
+  if(diffSec2 >= 1) {
+    this.props.WriteReviewSec2({ restaurant_name, restaurant_nameE, UserComment, uid, UserName: fullname, rateing_image, rate: rate || '5' });
+
+    this.props.BusinessUpdateSec2({ uid, total_rates1: new_sec2_Total_Rate, number_of_rates1: new_sec2_number_of_rates })
+  } else {
+
+    const total_rate_sec1 = int_total_rates + 1 ;
+    const number_of_rates_sec1 = int_number_of_rates + new_rate ;
+    const total_rate_sec2 = sec2_Total_Rate;
+    const number_of_rates_sec2 = sec2_number_of_rates ;
+    const sec1_sec2_total_rate = total_rate_sec1 + total_rate_sec2;
+    const sec1_sec2_number_of_rates = number_of_rates_sec1 + number_of_rates_sec2;
+    const sec1_sec2_avg = sec1_sec2_total_rate/sec1_sec2_number_of_rates;
+    const String_sec1_sec2_total_rate = sec1_sec2_total_rate.toString();
+    const Strinf_sec1_sec2_number_of_rates = sec1_sec2_number_of_rates.toString();
+
+    if (sec1_sec2_avg > 0 && sec1_sec2_avg <= 1) {
+      rateing_image1 = 'https://i.postimg.cc/0KG3ynvz/1.png';
+    }
+    else if (sec1_sec2_avg > 1 && sec1_sec2_avg <= 2) {
+      rateing_image1 = 'https://i.postimg.cc/yJwrhtYJ/2.png';
+    }
+    else if (sec1_sec2_avg > 2 && sec1_sec2_avg <= 3) {
+      rateing_image1 = 'https://i.postimg.cc/BtGJ4wcQ/3.png';
+    }
+    else if (sec1_sec2_avg > 3 && sec1_sec2_avg <= 4) {
+      rateing_image1 = 'https://i.postimg.cc/kBTCNMrB/4.png';
+    }
+    else if (sec1_sec2_avg > 4 && sec1_sec2_avg <= 5) {
+      rateing_image1 = 'https://i.postimg.cc/p5BGHdQ8/5.png';
+    }
+    let i;
+    const reviews = this.props.Reviewss;
+let transUsername;
+let transUsercomment;
+let transRate;
+let transImage;
+let ruid;
+
+for(i = 0; i < reviews.length; i++) {
+  transUsername = reviews[i].UserName;
+  transUsercomment = reviews[i].UserComment;
+  transRate = reviews[i].rate;
+  transImage = reviews[i].rateing_image;
+  ruid = reviews[i].uid;
+  this.props.TransReviewSec2({ UserName: transUsername, UserComment: transUsercomment, rate: transRate, rateing_image: transImage, uid: this.props.business.uid, ruid })
 }
+this.props.BusinessUpdate2({ uid });
+this.props.WriteReview({ restaurant_name, restaurant_nameE, UserComment, uid, UserName: fullname, rateing_image, rate: rate || '5' });
+
+this.props.BusinessUpdate({ uid, total_rates: String_sec1_sec2_total_rate, number_of_rates: Strinf_sec1_sec2_number_of_rates, rateing_image: rateing_image1 })
+
+  }
+}
+}
+
+  //here im cheking the avarage so i can give the business new rate
+
+// here im updating the business rate
+
+} else {
 if (this.props.language === 'Arabic')
 {
 Alert.alert(
@@ -192,6 +294,7 @@ Alert.alert(
 ],
 { cancelable: false }
 )}
+}
 }
 
 
@@ -229,12 +332,14 @@ const styles = {
 
 const mapStateToProps = (state) => {
   const { UserComment, rate } = state.reviewForm;
-
-  const { total_rates, number_of_rates, restaurant_name, restaurant_nameE } = state.business;
+  const Reviewss = _.map(state.reviews2, (val, uid) => {
+    return { ...val, uid };
+});
+  const { total_rates, number_of_rates, restaurant_name, restaurant_nameE, total_rates1, number_of_rates1  } = state.business;
   const language = state.language.Language;
   const Info = state.userInfo;
 
-  return { language, UserComment, rate, total_rates, number_of_rates, Info, restaurant_name, restaurant_nameE };
+  return { Reviewss, language, UserComment, rate, total_rates, number_of_rates, Info, restaurant_name, restaurant_nameE, total_rates1, number_of_rates1 };
 };
 
-export default connect(mapStateToProps, { WriteReview, reviewUpdate, BusinessFetch, BusinessUpdate, UserFetchInfo })(ReviewForm);
+export default connect(mapStateToProps, { WriteReview, reviewUpdate, BusinessFetch, BusinessUpdate, UserFetchInfo, WriteReviewSec2, BusinessUpdateSec2, ReviewsFetchSec2, TransReviewSec2, BusinessUpdate2 })(ReviewForm);

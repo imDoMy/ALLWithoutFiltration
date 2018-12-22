@@ -11,7 +11,7 @@ import FavReducer from './FavReducer';
 import FavoriteFetchReducer from './FavoriteFetchReducer';
 import BusinessFetchFav from './BusinessFetchFav';
 import RecommendLoading from './RecommendLoading';
-
+import Reviews2Reducer from './Reviews2Reducer';
 
 
 export default combineReducers({
@@ -26,5 +26,6 @@ export default combineReducers({
   favorite: FavReducer,
   favoriteBusinesses: FavoriteFetchReducer,
   fetchfavbusiness: BusinessFetchFav,
-  recom: RecommendLoading
+  recom: RecommendLoading,
+  reviews2: Reviews2Reducer
 });
